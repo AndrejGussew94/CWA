@@ -1,6 +1,7 @@
 #include "TetrisGame.hpp"
 
 #include <algorithm>
+#include <iostream>
 
 namespace
 {
@@ -89,6 +90,8 @@ constexpr const ShapeSet& ShapeFor(TetrisPieceType type)
 TetrisGame::TetrisGame()
 {
     Reset();
+    Score();
+    std::cout << "Score is used!" << std::endl;
 }
 
 void TetrisGame::Reset()

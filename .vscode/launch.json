@@ -1,0 +1,67 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        
+        
+        {
+            "name": "Запуск PoseidonTetris",
+            "type": "cppvsdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/dist/x64-win-rwdi/PoseidonTetris.exe",
+            "args": [
+                "-C",
+                "${workspaceFolder}/packages/Demo"
+            ],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "console": "externalTerminal",
+            "preLaunchTask": "Build"
+        },
+        {
+            "name": "Запуск PoseidonTetris (без сборки)",
+            "type": "cppvsdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/dist/x64-win-rwdi/PoseidonTetris.exe",
+            "args": [
+                "-C",
+                "${workspaceFolder}/packages/Demo"
+            ],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "console": "externalTerminal",
+            "preLaunchTask": ""
+        },
+        {
+            "name": "Запуск PoseidonTetris (Release)",
+            "type": "cppvsdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/dist/x64-win-rwdi/PoseidonTetris.exe",
+            "args": [
+                "-C",
+                "${workspaceFolder}/packages/Demo"
+            ],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "console": "externalTerminal",
+            "preLaunchTask": "Build"
+        },
+        {
+            "name": "Запуск PoseidonTetris (без отладки)",
+            "type": "cppvsdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/dist/x64-win-rwdi/PoseidonTetris.exe",
+            "args": [
+                "-C",
+                "${workspaceFolder}/packages/Demo"
+            ],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "console": "externalTerminal",
+            "preLaunchTask": "Build"
+        }
+    ]
+}

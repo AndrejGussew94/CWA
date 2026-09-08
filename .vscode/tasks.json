@@ -1,0 +1,72 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "CMake Configure",
+            "type": "shell",
+            "command": "cmake",
+            "args": [
+                "--preset",
+                "win-x64-clang-rwdi"
+            ],
+            "group": "build",
+            "problemMatcher": [],
+            "detail": "Настройка CMake с пресетом win-x64-clang-rwdi"
+        },
+        {
+            "label": "Build",
+            "type": "shell",
+            "command": "cmake",
+            "args": [
+                "--build",
+                "build/win-x64-clang-rwdi"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "detail": "Сборка проекта (cmake --build build/win-x64-clang-rwdi)",
+            "dependsOn": [
+                "CMake Configure"
+            ]
+        },
+        {
+            "label": "Build Clean",
+            "type": "shell",
+            "command": "cmake",
+            "args": [
+                "--build",
+                "build/win-x64-clang-rwdi",
+                "--target",
+                "clean"
+            ],
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "detail": "Очистка собранных файлов"
+        },
+        {
+            "label": "Full Rebuild",
+            "type": "shell",
+            "command": "cmake",
+            "args": [
+                "--build",
+                "build/win-x64-clang-rwdi",
+                "--target",
+                "clean"
+            ],
+            "group": "build",
+            "problemMatcher": [],
+            "detail": "Полная пересборка (очистка + конфигурация + сборка)",
+            "dependsOn": [
+                "Build Clean",
+                "CMake Configure",
+                "Build"
+            ],
+            "dependsOrder": "sequence"
+        }
+    ]
+}
