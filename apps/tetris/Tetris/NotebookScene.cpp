@@ -1,4 +1,5 @@
 #include "NotebookScene.hpp"
+#include <iostream>
 
 #include <Poseidon/Graphics/Rendering/Shape/Shape.hpp>
 #include <Poseidon/World/Scene/Scene.hpp>
@@ -49,7 +50,7 @@ Vector3 NotebookFarPosition()
 }
 } // namespace
 
-NotebookScene::NotebookScene() : Object(nullptr, -1) {}
+NotebookScene::NotebookScene() : Object(nullptr, -1) {} // 0=closed, 1=open }
 
 NotebookScene::~NotebookScene() = default;
 

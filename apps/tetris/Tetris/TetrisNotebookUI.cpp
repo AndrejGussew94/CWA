@@ -58,26 +58,26 @@ class TetrisNotebookScreenControl : public C3DStatic
 
         DrawOutline(kBoardX, kBoardY, kBoardW, kBoardH, frameColor, normal, 0.0042f);
 
-        const Vector3 cellRight = (kBoardW / static_cast<float>(TetrisGame::BoardWidth)) * _right;
-        const Vector3 cellDown = (kBoardH / static_cast<float>(TetrisGame::BoardHeight)) * _down;
+        const Vector3 cellRight = (kBoardW / static_cast<float>(_game->BoardWidth())) * _right;
+        const Vector3 cellDown  = (kBoardH / static_cast<float>(TetrisGame::BoardHeight)) * _down;
 
-        for (int32_t y = 0; y < TetrisGame::BoardHeight; ++y)
+        for (int32_t y = 0; y < TetrisGame::BoardHeight; ++y)          // без ()
         {
-            for (int32_t x = 0; x < TetrisGame::BoardWidth; ++x)
+            for (int32_t x = 0; x < _game->BoardWidth(); ++x)          // со ()
             {
                 if (!_game->IsCellOccupied(x, y))
-                {
                     continue;
-                }
 
-                const float cellX =
-                    kBoardX + kBoardW * (static_cast<float>(x) / static_cast<float>(TetrisGame::BoardWidth));
-                const float cellY =
-                    kBoardY + kBoardH * (static_cast<float>(y) / static_cast<float>(TetrisGame::BoardHeight));
-                DrawRect(cellX, cellY, kBoardW / static_cast<float>(TetrisGame::BoardWidth),
-                         kBoardH / static_cast<float>(TetrisGame::BoardHeight), blockFill, normal, 0.0044f);
-                DrawOutline(cellX, cellY, kBoardW / static_cast<float>(TetrisGame::BoardWidth),
-                            kBoardH / static_cast<float>(TetrisGame::BoardHeight), frameColor, normal, 0.0048f);
+                const float cellW = kBoardW / static_cast<float>(_game->BoardWidth());
+                const float cellH = kBoardH / static_cast<float>(TetrisGame::BoardHeight);
+
+                const float cellX = kBoardX + kBoardW * (static_cast<float>(x) /
+                                                        static_cast<float>(_game->BoardWidth()));
+                const float cellY = kBoardY + kBoardH * (static_cast<float>(y) /
+                                                        static_cast<float>(TetrisGame::BoardHeight));
+
+                DrawRect(cellX, cellY, cellW, cellH, blockFill, normal, 0.0044f);
+                DrawOutline(cellX, cellY, cellW, cellH, frameColor, normal, 0.0048f);
             }
         }
 

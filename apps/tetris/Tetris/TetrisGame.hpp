@@ -28,8 +28,9 @@ struct TetrisActivePiece {
 
 class TetrisGame {
 public:
-    static constexpr int32_t BoardWidth = 10;
-    static constexpr int32_t BoardHeight = 20;
+    static constexpr int32_t BaseBoardWidth = 10;
+    static constexpr int32_t MaxBoardWidth  = 20; // предел расширения
+    static constexpr int32_t BoardHeight    = 20;
 
     TetrisGame();
 
@@ -53,15 +54,19 @@ public:
     void SetOccupied(int32_t x, int32_t y, bool occupied);
     void ForceActivePiece(TetrisPieceType type, int32_t rotation, int32_t x, int32_t y);
 
+    [[nodiscard]] int32_t BoardWidth() const { return _boardWidth; }
+    [[nodiscard]] float GetGravityStepSeconds() const;
+    
 private:
-    using BoardCells = std::array<uint8_t, BoardWidth * BoardHeight>;
+    using BoardCells = std::array<uint8_t, MaxBoardWidth * BoardHeight>;
 
-    static std::size_t CellIndex(int32_t x, int32_t y);
-
+    [[nodiscard]] std::size_t CellIndex(int32_t x, int32_t y) const;
     [[nodiscard]] bool Collides(const TetrisActivePiece& piece) const;
     void LockActivePiece();
     void ClearCompletedLines();
     void SpawnNextPiece();
+    void ApplyScoreThresholds();
+    
 
     BoardCells _board {};
     TetrisActivePiece _activePiece {};
@@ -70,4 +75,8 @@ private:
     int32_t _score = 0;
     int32_t _linesCleared = 0;
     bool _gameOver = false;
-};
+
+    int32_t _boardWidth = BaseBoardWidth;
+    int32_t _nextSpeedThreshold  = 100;   // score, на котором ускоряемся
+    int32_t _nextExpandThreshold = 1000;  // score, на котором расширяем поле
+    };

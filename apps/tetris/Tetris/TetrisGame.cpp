@@ -97,6 +97,10 @@ TetrisGame::TetrisGame()
 void TetrisGame::Reset()
 {
     _board.fill(0);
+    _boardWidth = BaseBoardWidth;
+    _nextSpeedThreshold  = 100;
+    _nextExpandThreshold = 1000;
+
     _pieceSequence = {
         TetrisPieceType::I, TetrisPieceType::O, TetrisPieceType::T, TetrisPieceType::L,
         TetrisPieceType::J, TetrisPieceType::S, TetrisPieceType::Z,
@@ -246,9 +250,9 @@ void TetrisGame::ForceActivePiece(TetrisPieceType type, int32_t rotation, int32_
     };
 }
 
-std::size_t TetrisGame::CellIndex(int32_t x, int32_t y)
+std::size_t TetrisGame::CellIndex(int32_t x, int32_t y) const
 {
-    return static_cast<std::size_t>(y * BoardWidth + x);
+    return static_cast<std::size_t>(y * _boardWidth + x);
 }
 
 bool TetrisGame::Collides(const TetrisActivePiece& piece) const
@@ -258,7 +262,7 @@ bool TetrisGame::Collides(const TetrisActivePiece& piece) const
     {
         const int32_t cellX = piece.x + cell.x;
         const int32_t cellY = piece.y + cell.y;
-        if (cellX < 0 || cellX >= BoardWidth || cellY < 0 || cellY >= BoardHeight)
+        if (cellX < 0 || cellX >= _boardWidth || cellY < 0 || cellY >= BoardHeight)
         {
             return true;
         }
@@ -290,7 +294,7 @@ void TetrisGame::ClearCompletedLines()
     for (int32_t y = BoardHeight - 1; y >= 0; --y)
     {
         bool rowComplete = true;
-        for (int32_t x = 0; x < BoardWidth; ++x)
+        for (int32_t x = 0; x < _boardWidth; ++x)
         {
             if (!IsCellOccupied(x, y))
             {
@@ -307,13 +311,13 @@ void TetrisGame::ClearCompletedLines()
         ++clearedThisLock;
         for (int32_t shiftY = y; shiftY > 0; --shiftY)
         {
-            for (int32_t x = 0; x < BoardWidth; ++x)
+            for (int32_t x = 0; x < _boardWidth; ++x)
             {
                 _board[CellIndex(x, shiftY)] = _board[CellIndex(x, shiftY - 1)];
             }
         }
 
-        for (int32_t x = 0; x < BoardWidth; ++x)
+        for (int32_t x = 0; x < _boardWidth; ++x)
         {
             _board[CellIndex(x, 0)] = 0;
         }
@@ -327,12 +331,61 @@ void TetrisGame::ClearCompletedLines()
 
 void TetrisGame::SpawnNextPiece()
 {
+    const int32_t spawnX = _boardWidth / 2 - 1;
     _activePiece = {
         _pieceSequence[_nextSequenceIndex % _pieceSequence.size()],
         0,
-        3,
+        spawnX,
         0,
     };
     ++_nextSequenceIndex;
     _gameOver = Collides(_activePiece);
+}
+
+void TetrisGame::ApplyScoreThresholds()
+{
+    // Ускорение каждые 100 очков (порог растёт)
+    while (_score >= _nextSpeedThreshold)
+    {
+        _nextSpeedThreshold += 100;
+        // gravityStep пересчитывается в TetrisApplication по Score()
+        // здесь только фиксируем, что порог пройден (см. GetGravityStepSeconds)
+    }
+
+    // Расширение поля каждые 1000 очков (порог растёт)
+    while (_score >= _nextExpandThreshold && _boardWidth < MaxBoardWidth)
+    {
+        _nextExpandThreshold += 1000;
+        ++_boardWidth;
+
+        // Сдвигаем содержимое: добавляем столбец слева и справа,
+        // сохраняя существующие блоки по центру.
+        BoardCells newBoard {};
+        const int32_t shift = 1; // на сколько столбцов расширили
+        for (int32_t y = 0; y < BoardHeight; ++y)
+        {
+            for (int32_t x = 0; x < _boardWidth - shift * 2; ++x)
+            {
+                newBoard[static_cast<std::size_t>(y * _boardWidth + x + shift)] =
+                    _board[static_cast<std::size_t>(y * (_boardWidth - shift * 2) + x)];
+            }
+        }
+        _board = newBoard;
+
+        // Сдвигаем активную фигуру вправо
+        _activePiece.x += shift;
+    }
+}
+
+float TetrisGame::GetGravityStepSeconds() const
+{
+    // Базовый шаг 0.10 c, каждые 100 очков — на 10% быстрее,
+    // но не быстрее 0.02 c.
+    const int32_t speedTier = _score / 100;
+    float step = 0.50f;             
+    for (int32_t i = 0; i < speedTier; ++i)
+        step *= 0.9f;
+    if (step < 0.02f)
+        step = 0.02f;
+    return step;
 }

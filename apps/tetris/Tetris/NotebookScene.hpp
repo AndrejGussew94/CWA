@@ -48,9 +48,9 @@ private:
     // zoom curve, and animation speed are identical to the options
     // menu.
     float _phase = 0.0f;        // 0=closed, 1=open
-    float _animSpeed = 1.0f;    // 1 second open→close cycle
+    float _animSpeed = 2.0f;    // 1 second open→close cycle
     float _zoomT = 0.0f;        // 0=far (positionBack), 1=near (position)
-    float _zoomDuration = 1.0f; // matches RscOptionsShell
+    float _zoomDuration = 5.0f; // matches RscOptionsShell
 
     bool _loaded = false;
 };

@@ -31,7 +31,7 @@ TEST_CASE("TetrisGame locks pieces and clears completed lines deterministically"
     TetrisGame game;
     game.ClearBoard();
 
-    for (int32_t x = 4; x < TetrisGame::BoardWidth; ++x)
+    for (int32_t x = 4; x < TetrisGame::MaxBoardWidth; ++x)
     {
         game.SetOccupied(x, TetrisGame::BoardHeight - 1, true);
     }
@@ -41,7 +41,7 @@ TEST_CASE("TetrisGame locks pieces and clears completed lines deterministically"
 
     CHECK(game.LinesCleared() == 1);
     CHECK(game.Score() == 100);
-    for (int32_t x = 0; x < TetrisGame::BoardWidth; ++x)
+    for (int32_t x = 0; x < TetrisGame::MaxBoardWidth; ++x)
     {
         CHECK_FALSE(game.IsCellOccupied(x, TetrisGame::BoardHeight - 1));
     }

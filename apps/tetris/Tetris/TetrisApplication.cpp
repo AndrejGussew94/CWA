@@ -29,6 +29,10 @@
 
 #include <SDL3/SDL.h>
 
+#include <algorithm>
+#include <string>
+#include <vector>
+
 using namespace Poseidon;
 
 extern void CleanupSoundSystem();
@@ -154,10 +158,10 @@ void TetrisApplication::RunMainLoop()
             return;
         }
         LOG_INFO(Core, "TetrisApplication: notebook UI ready, entering render loop");
+        LOG_INFO(Core, "It is on");
 
         float gravityAccumulator = 0.0f;
         float elapsedSeconds = 0.0f;
-        constexpr float kGravityStepSeconds = 0.35f;
         bool prevLeft = false;
         bool prevRight = false;
         bool prevRotate = false;
@@ -175,6 +179,15 @@ void TetrisApplication::RunMainLoop()
         constexpr float kHintSize = 0.04f;     // normalized text height
         constexpr float kHintMarginX = 0.012f; // ~1% of screen width
         constexpr float kHintMarginY = 0.012f;
+
+        struct Notification
+        {
+            std::string text;
+            float remaining = 0.0f;
+        };
+        std::vector<Notification> notifications;
+        float lastScore = 0.0f;
+        int32_t lastBoardWidth = game.BoardWidth();
 
         while (!m_closeRequest)
         {
@@ -222,17 +235,51 @@ void TetrisApplication::RunMainLoop()
             {
                 gravityAccumulator += deltaT;
                 HandleTetrisInput(game, prevLeft, prevRight, prevRotate, prevDown);
-                while (gravityAccumulator >= kGravityStepSeconds)
+
+                const float gravityStep = game.GetGravityStepSeconds();
+                static float s_logTimer = 0.0f;
+                s_logTimer += deltaT;
+                if (s_logTimer > 1.0f)
+                {
+                    s_logTimer = 0.0f;
+                    LOG_INFO(Core, "gravityStep={} score={} boardWidth={}", gravityStep, game.Score(), game.BoardWidth());
+                }
+                while (gravityAccumulator >= gravityStep)
                 {
                     game.AdvanceGravityStep();
-                    gravityAccumulator -= kGravityStepSeconds;
+                    gravityAccumulator -= gravityStep;
                 }
+
                 if (game.IsGameOver())
                 {
                     game.Reset();
                     gravityAccumulator = 0.0f;
+                    lastScore = 0.0f;
+                    lastBoardWidth = game.BoardWidth();
                 }
+
+                const int32_t scoreNow = game.Score();
+                if (scoreNow / 100 > static_cast<int32_t>(lastScore) / 100)
+                {
+                    notifications.push_back({ "Speed increased!", 3.0f });
+                }
+                if (game.BoardWidth() != lastBoardWidth)
+                {
+                    notifications.push_back({ "Board expanded!", 3.0f });
+                }
+                lastScore = static_cast<float>(scoreNow);
+                lastBoardWidth = game.BoardWidth();
             }
+
+            // Tick notifications every frame, regardless of whether the
+            // notebook is open — otherwise the message would freeze on
+            // screen if the player closes the notebook.
+            for (auto& n : notifications)
+                n.remaining -= deltaT;
+            notifications.erase(
+                std::remove_if(notifications.begin(), notifications.end(),
+                               [](const Notification& n) { return n.remaining <= 0.0f; }),
+                notifications.end());
 
             if (AppConfig::Instance().AppTimeoutSeconds() > 0.0f &&
                 elapsedSeconds >= AppConfig::Instance().AppTimeoutSeconds())
@@ -242,6 +289,7 @@ void TetrisApplication::RunMainLoop()
 
             if (!GEngine->IsAbleToDraw())
                 continue;
+
             GEngine->InitDraw(true, kBlack);
             notebook.OnDraw(nullptr, 1.0f);
 
@@ -251,15 +299,25 @@ void TetrisApplication::RunMainLoop()
                                   notebook.IsOpen() ? kHintNotebookOpen : kHintNotebookClosed);
                 GEngine->DrawText(Point2DFloat(kHintMarginX, kHintMarginY + kHintSize * 1.1f), kHintSize, hintFont,
                                   kHintColor, kHintExit);
+
+                // Notifications centred at the top.
+                float notifyY = kHintMarginY + kHintSize * 3.0f;
+                const PackedColor kNotifyColor(Color(1.0f, 0.9f, 0.2f, 1.0f));
+                for (const auto& n : notifications)
+                {
+                    GEngine->DrawText(Point2DFloat(0.35f, notifyY), kHintSize * 1.2f, hintFont, kNotifyColor,
+                                      n.text.c_str());
+                    notifyY += kHintSize * 1.4f;
+                }
             }
 
             GEngine->FinishDraw();
             GEngine->NextFrame();
-        }
-    }
+        } // while (!m_closeRequest)
 
-    LOG_INFO(Core, "TetrisApplication: main loop exited");
-    m_validateQuit = true;
-    ProgressFinish();
-    DDTerm();
+        LOG_INFO(Core, "TetrisApplication: main loop exited");
+        m_validateQuit = true;
+        ProgressFinish();
+        DDTerm();
+    } // scope holding hintFont / game / notebook
 }
