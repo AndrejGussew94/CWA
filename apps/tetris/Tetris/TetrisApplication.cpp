@@ -174,6 +174,7 @@ void TetrisApplication::RunMainLoop()
         const char* kHintNotebookOpen = "SPACE - close notebook";
         const char* kHintNotebookClosed = "SPACE - open notebook";
         const char* kHintExit = "ESC - close";
+        const char* kHintCheat = "Z - cheat +100 score";  
         const PackedColor kHintColor(Color(1.0f, 1.0f, 1.0f, 1.0f));
         const PackedColor kBlack(Color(0.0f, 0.0f, 0.0f, 1.0f));
         constexpr float kHintSize = 0.04f;     // normalized text height
@@ -211,6 +212,16 @@ void TetrisApplication::RunMainLoop()
                 notebook.ToggleOpen();
             }
             prevToggleNotebook = toggleNotebook;
+
+            static bool prevCheatScore = false;
+            const bool cheatScore = keys && keys[SDL_SCANCODE_Z];
+            if (cheatScore && !prevCheatScore)
+            {
+                game.AddScore(100);
+                LOG_INFO(Core, "Cheat: +100 score (now {})", game.Score());
+            }
+            prevCheatScore = cheatScore;
+
 
             // Frame delta — clamp so a debugger pause doesn't fast-forward
             // the animation past phase 1 on resume.
@@ -299,6 +310,8 @@ void TetrisApplication::RunMainLoop()
                                   notebook.IsOpen() ? kHintNotebookOpen : kHintNotebookClosed);
                 GEngine->DrawText(Point2DFloat(kHintMarginX, kHintMarginY + kHintSize * 1.1f), kHintSize, hintFont,
                                   kHintColor, kHintExit);
+                GEngine->DrawText(Point2DFloat(kHintMarginX, kHintMarginY + kHintSize * 2.2f), kHintSize, hintFont,
+                                  kHintColor, kHintCheat);                  
 
                 // Notifications centred at the top.
                 float notifyY = kHintMarginY + kHintSize * 3.0f;

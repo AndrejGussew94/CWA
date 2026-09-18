@@ -41,6 +41,7 @@ public:
     void MoveLeft();
     void MoveRight();
     void RotateClockwise();
+    void AddScore(int32_t amount);
 
     [[nodiscard]] bool IsCellOccupied(int32_t x, int32_t y) const;
     [[nodiscard]] bool IsGameOver() const;

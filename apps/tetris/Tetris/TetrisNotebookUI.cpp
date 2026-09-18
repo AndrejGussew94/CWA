@@ -94,6 +94,7 @@ class TetrisNotebookScreenControl : public C3DStatic
         DrawLabel(("LINES " + std::to_string(_game->LinesCleared())).c_str(), 0.62f, 0.40f, 0.050f, frameColor, normal,
                   0.0055f);
         DrawLabel("ARROWS/X", 0.62f, 0.50f, 0.045f, frameColor, normal, 0.0055f);
+        DrawLabel("Z: +100", 0.62f, 0.60f, 0.045f, frameColor, normal, 0.0055f);
     }
 
   private:

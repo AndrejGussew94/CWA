@@ -389,3 +389,14 @@ float TetrisGame::GetGravityStepSeconds() const
         step = 0.02f;
     return step;
 }
+
+void TetrisGame::AddScore(int32_t amount)
+{
+    if (amount <= 0)
+    {
+        return;
+    }
+
+    _score += amount;
+    ApplyScoreThresholds();
+}
